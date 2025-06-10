@@ -6,11 +6,9 @@ import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const BookingPage = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedService, setSelectedService] = useState(null);
     const [selectedSlot, setSelectedSlot] = useState(null);
