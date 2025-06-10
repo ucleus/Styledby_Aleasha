@@ -30,12 +30,4 @@ class Customer extends Model
     {
         return $this->email;
     }
-
-    /**
-     * Route notifications for the Vonage channel.
-     */
-    public function routeNotificationForVonage($notification): ?string
-    {
-        return $this->phone;
-    }
 }

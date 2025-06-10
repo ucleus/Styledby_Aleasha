@@ -6,7 +6,6 @@ use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\VonageMessage;
 
 class AppointmentReminder extends Notification
 {
@@ -21,14 +20,7 @@ class AppointmentReminder extends Notification
 
     public function via($notifiable): array
     {
-        $channels = ['mail'];
-        
-        // Only add SMS if phone number exists
-        if ($notifiable->phone) {
-            $channels[] = 'vonage';
-        }
-        
-        return $channels;
+        return ['mail'];
     }
 
     public function toMail($notifiable): MailMessage
@@ -46,14 +38,5 @@ class AppointmentReminder extends Notification
             ->action('View Appointment Details', url('/appointments/' . $this->appointment->id))
             ->line('Looking forward to seeing you!')
             ->salutation('Best regards, Aleasha');
-    }
-
-    public function toVonage($notifiable): VonageMessage
-    {
-        return (new VonageMessage)
-            ->content('Reminder: Your appointment at Styles By Aleasha is tomorrow at ' . 
-                     $this->appointment->start_at->format('g:i A') . 
-                     ' for ' . $this->appointment->serviceType->name . 
-                     '. See you then! Reply STOP to opt out.');
     }
 }
