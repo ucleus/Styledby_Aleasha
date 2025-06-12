@@ -22,6 +22,7 @@ class ServiceType extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+    protected $appends = ['deposit_amount_cents'];
 
     public function appointments(): HasMany
     {
