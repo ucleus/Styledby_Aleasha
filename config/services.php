@@ -32,8 +32,15 @@ return [
     ],
 
     'twilio' => [
-    'sid' => env('TWILIO_SID'),
-    'token' => env('TWILIO_TOKEN'),
-    'from' => env('TWILIO_FROM'),
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
+
+    'square' => [
+        'access_token' => env('SQUARE_ACCESS_TOKEN'),
+        'location_id' => env('SQUARE_LOCATION_ID'),
+        'environment' => env('SQUARE_ENVIRONMENT'),
+        'webhook_signature_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
     ],
 ];
