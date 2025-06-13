@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Font Families */
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Global Styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+.btn {
+  @apply px-4 py-2 rounded transition duration-200;
+}
+
+.btn-primary {
+  @apply bg-purple-600 text-white hover:bg-purple-700;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+/* Form Styles */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600;
+}
+
+.form-label {
+  @apply block text-gray-700 text-sm font-bold mb-2;
+}
+
+/* Custom Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

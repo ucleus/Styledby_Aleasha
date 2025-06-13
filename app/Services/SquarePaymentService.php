@@ -17,10 +17,10 @@ class SquarePaymentService
 
     public function __construct()
     {
-        $this->client = new SquareClient([
-            'accessToken' => config('services.square.access_token'),
-            'environment' => config('services.square.environment'),
-        ]);
+        $this->client = new SquareClient(
+            config('services.square.access_token'),
+            config('services.square.environment')
+        );
         
         $this->locationId = config('services.square.location_id');
     }

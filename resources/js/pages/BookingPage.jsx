@@ -5,7 +5,7 @@ import { Calendar } from '../components/ui/calendar';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import axios from 'axios';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const BookingPage = () => {
