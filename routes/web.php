@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\HomeController;
 
+// Test route to verify Laravel is working
+Route::get('/test', function () {
+    return view('test');
+});
+
 // Square webhook
 Route::post('/webhooks/square', [WebhookController::class, 'handleSquareWebhook']);
 

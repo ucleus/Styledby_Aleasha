@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Constants\HttpStatusCodes;
-use App\Http\Controllers\Api\BaseController;
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Notifications\PaymentReceived;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class WebhookController extends BaseController
+class WebhookController extends Controller
 {
     public function handleSquareWebhook(Request $request): JsonResponse
     {
@@ -23,13 +23,19 @@ class WebhookController extends BaseController
         );
 
         if ($hash !== $signature) {
-            return $this->sendError('Invalid signature', [], HttpStatusCodes::UNAUTHORIZED);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid signature'
+            ], HttpStatusCodes::UNAUTHORIZED);
         }
 
         $data = json_decode($body, true);
 
         if (!isset($data['type'])) {
-            return $this->sendError('Invalid webhook payload', [], HttpStatusCodes::BAD_REQUEST);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid webhook payload'
+            ], HttpStatusCodes::BAD_REQUEST);
         }
 
         switch ($data['type']) {
@@ -37,10 +43,17 @@ class WebhookController extends BaseController
                 $this->handlePaymentCreated($data['data']);
                 break;
             default:
-                return $this->sendError('Unsupported webhook event type', [], HttpStatusCodes::BAD_REQUEST);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unsupported webhook event type'
+                ], HttpStatusCodes::BAD_REQUEST);
         }
 
-        return $this->sendResponse([], 'Webhook processed successfully');
+        return response()->json([
+            'success' => true,
+            'data' => [],
+            'message' => 'Webhook processed successfully'
+        ]);
     }
 
     private function handlePaymentCreated($data): void
