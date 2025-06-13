@@ -35,7 +35,7 @@ class AuthController extends BaseController
                 'isAdmin' => $verifiedIdToken->claims()->get('admin', false),
             ]);
         } catch (\Exception $e) {
-            return $this->sendError('Invalid token', [$e->getMessage()], 401);
+            return $this->sendError('Invalid token', [$e->getMessage()], HttpStatusCodes::UNAUTHORIZED);
         }
     }
 }

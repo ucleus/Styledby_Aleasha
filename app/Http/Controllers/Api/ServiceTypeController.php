@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\HttpStatusCodes;
 use App\Models\ServiceType;
 use Illuminate\Http\JsonResponse;
 
@@ -18,7 +19,7 @@ class ServiceTypeController extends BaseController
         $service = ServiceType::find($id);
         
         if (!$service) {
-            return $this->sendError('Service not found');
+            return $this->sendError('Service not found', [], HttpStatusCodes::NOT_FOUND);
         }
 
         return $this->sendResponse($service);

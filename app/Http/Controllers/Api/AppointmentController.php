@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\HttpStatusCodes;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\ServiceType;
@@ -35,7 +36,7 @@ class AppointmentController extends BaseController
 
             $customer = Customer::where('firebase_uid', $request->firebase_uid)->first();
             if (!$customer) {
-                return $this->sendError('Customer not found', [], 404);
+                return $this->sendError('Customer not found', [], HttpStatusCodes::NOT_FOUND);
             }
 
             $serviceType = ServiceType::find($request->service_type_id);
@@ -51,7 +52,7 @@ class AppointmentController extends BaseController
                 ->exists();
 
             if ($isBooked) {
-                return $this->sendError('This time slot is no longer available', [], 400);
+                return $this->sendError('This time slot is no longer available', [], HttpStatusCodes::CONFLICT);
             }
 
             // Create appointment
@@ -84,7 +85,7 @@ class AppointmentController extends BaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->sendError('Failed to create appointment', [$e->getMessage()], 500);
+            return $this->sendError('Failed to create appointment', [$e->getMessage()], HttpStatusCodes::INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -93,7 +94,7 @@ class AppointmentController extends BaseController
         $appointment = Appointment::with(['customer', 'serviceType'])->find($id);
         
         if (!$appointment) {
-            return $this->sendError('Appointment not found');
+            return $this->sendError('Appointment not found', [], HttpStatusCodes::NOT_FOUND);
         }
 
         return $this->sendResponse($appointment);
@@ -104,17 +105,17 @@ class AppointmentController extends BaseController
         $appointment = Appointment::find($id);
         
         if (!$appointment) {
-            return $this->sendError('Appointment not found');
+            return $this->sendError('Appointment not found', [], HttpStatusCodes::NOT_FOUND);
         }
 
         $customer = Customer::where('firebase_uid', $request->firebase_uid)->first();
         
         if ($appointment->customer_id !== $customer->id) {
-            return $this->sendError('Unauthorized', [], 403);
+            return $this->sendError('Unauthorized', [], HttpStatusCodes::FORBIDDEN);
         }
 
         if ($appointment->status === 'canceled') {
-            return $this->sendError('Appointment already canceled', [], 400);
+            return $this->sendError('Appointment already canceled', [], HttpStatusCodes::BAD_REQUEST);
         }
 
         $appointment->update(['status' => 'canceled']);

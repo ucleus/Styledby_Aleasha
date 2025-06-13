@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\HttpStatusCodes;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
 class BaseController extends Controller
 {
-    protected function sendResponse($result, $message = 'Success'): JsonResponse
+    protected function sendResponse($result, $message = 'Success', $code = HttpStatusCodes::OK): JsonResponse
     {
         return response()->json([
             'success' => true,
             'data'    => $result,
             'message' => $message,
-        ], 200);
+        ], $code);
     }
 
-    protected function sendError($error, $errorMessages = [], $code = 404): JsonResponse
+    protected function sendError($error, $errorMessages = [], $code = HttpStatusCodes::NOT_FOUND): JsonResponse
     {
         $response = [
             'success' => false,
