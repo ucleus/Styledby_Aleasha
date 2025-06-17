@@ -4,12 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\AvailabilityWindow;
 use App\Models\Appointment;
+use App\Services\GoogleCalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class AvailabilityController extends BaseController
 {
+    protected $googleCalendar;
+
+    public function __construct(GoogleCalendarService $googleCalendar)
+    {
+        $this->googleCalendar = $googleCalendar;
+    }
+
     public function getAvailableSlots(Request $request): JsonResponse
     {
         $request->validate([
@@ -29,12 +37,18 @@ class AvailabilityController extends BaseController
             })
             ->get();
 
+        // Get busy times from Google Calendar
+        $busyTimes = $this->googleCalendar->getBusyTimes(
+            $date->startOfDay()->toDateTimeString(),
+            $date->endOfDay()->toDateTimeString()
+        );
+
         $availableSlots = [];
 
         foreach ($windows as $window) {
             if ($window->hasAvailableSlots()) {
-                // Generate time slots within the window
-                $slots = $this->generateTimeSlots($window, $serviceTypeId);
+                // Generate time slots within the window, considering Google Calendar conflicts
+                $slots = $this->generateTimeSlots($window, $serviceTypeId, $busyTimes);
                 $availableSlots = array_merge($availableSlots, $slots);
             }
         }
@@ -42,7 +56,7 @@ class AvailabilityController extends BaseController
         return $this->sendResponse($availableSlots);
     }
 
-    private function generateTimeSlots($window, $serviceTypeId)
+    private function generateTimeSlots($window, $serviceTypeId, $busyTimes = [])
     {
         $slots = [];
         $serviceDuration = \App\Models\ServiceType::find($serviceTypeId)->duration_min;
@@ -52,6 +66,7 @@ class AvailabilityController extends BaseController
             // Check if this specific slot is available
             $slotEnd = $current->copy()->addMinutes($serviceDuration);
             
+            // Check database bookings
             $isBooked = Appointment::where('status', '!=', 'canceled')
                 ->where(function ($query) use ($current, $slotEnd) {
                     $query->whereBetween('start_at', [$current, $slotEnd])
@@ -63,7 +78,10 @@ class AvailabilityController extends BaseController
                 })
                 ->exists();
 
-            if (!$isBooked) {
+            // Check Google Calendar conflicts
+            $isConflicted = $this->hasGoogleCalendarConflict($current, $slotEnd, $busyTimes);
+
+            if (!$isBooked && !$isConflicted) {
                 $slots[] = [
                     'start_at' => $current->toIso8601String(),
                     'end_at' => $slotEnd->toIso8601String(),
@@ -75,5 +93,20 @@ class AvailabilityController extends BaseController
         }
 
         return $slots;
+    }
+
+    private function hasGoogleCalendarConflict($slotStart, $slotEnd, $busyTimes)
+    {
+        foreach ($busyTimes as $busy) {
+            $busyStart = Carbon::parse($busy['start']);
+            $busyEnd = Carbon::parse($busy['end']);
+            
+            // Check for overlap
+            if ($slotStart->lt($busyEnd) && $slotEnd->gt($busyStart)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

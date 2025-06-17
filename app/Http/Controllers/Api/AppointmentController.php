@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\ServiceType;
 use App\Services\SquarePaymentService;
+use App\Services\GoogleCalendarService;
 use App\Notifications\AppointmentBooked;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -16,10 +17,12 @@ use Carbon\Carbon;
 class AppointmentController extends BaseController
 {
     protected $squareService;
+    protected $googleCalendar;
 
-    public function __construct(SquarePaymentService $squareService)
+    public function __construct(SquarePaymentService $squareService, GoogleCalendarService $googleCalendar)
     {
         $this->squareService = $squareService;
+        $this->googleCalendar = $googleCalendar;
     }
 
     public function store(Request $request): JsonResponse
@@ -43,7 +46,7 @@ class AppointmentController extends BaseController
             $startAt = Carbon::parse($request->start_at);
             $endAt = $startAt->copy()->addMinutes($serviceType->duration_min);
 
-            // Check availability
+            // Check availability in database
             $isBooked = Appointment::where('status', '!=', 'canceled')
                 ->where(function ($query) use ($startAt, $endAt) {
                     $query->whereBetween('start_at', [$startAt, $endAt])
@@ -52,6 +55,16 @@ class AppointmentController extends BaseController
                 ->exists();
 
             if ($isBooked) {
+                return $this->sendError('This time slot is no longer available', [], HttpStatusCodes::CONFLICT);
+            }
+
+            // Check availability in Google Calendar
+            $isAvailable = $this->googleCalendar->isTimeSlotAvailable(
+                $startAt->toDateTimeString(),
+                $endAt->toDateTimeString()
+            );
+
+            if (!$isAvailable) {
                 return $this->sendError('This time slot is no longer available', [], HttpStatusCodes::CONFLICT);
             }
 
@@ -64,6 +77,19 @@ class AppointmentController extends BaseController
                 'status' => 'booked',
                 'notes' => $request->notes,
             ]);
+
+            // Create Google Calendar event
+            $calendarEvent = $this->googleCalendar->createAppointment([
+                'title' => $serviceType->name . ' - ' . $customer->name,
+                'description' => $request->notes ?? '',
+                'start_time' => $startAt->toDateTimeString(),
+                'end_time' => $endAt->toDateTimeString(),
+                'customer_email' => $customer->email,
+            ]);
+
+            if ($calendarEvent['success']) {
+                $appointment->update(['google_event_id' => $calendarEvent['event_id']]);
+            }
 
             // Create Square checkout
             $depositAmount = $serviceType->deposit_amount_cents;
@@ -116,6 +142,11 @@ class AppointmentController extends BaseController
 
         if ($appointment->status === 'canceled') {
             return $this->sendError('Appointment already canceled', [], HttpStatusCodes::BAD_REQUEST);
+        }
+
+        // Cancel Google Calendar event if it exists
+        if ($appointment->google_event_id) {
+            $this->googleCalendar->cancelAppointment($appointment->google_event_id);
         }
 
         $appointment->update(['status' => 'canceled']);

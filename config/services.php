@@ -37,4 +37,11 @@ return [
         'location_id' => env('SQUARE_LOCATION_ID'),
         'webhook_signature_key' => env('SQUARE_WEBHOOK_SIGNATURE_KEY'),
     ],
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'calendar_id' => env('GOOGLE_CALENDAR_ID', 'primary'),
+        'service_account_key_path' => env('GOOGLE_SERVICE_ACCOUNT_KEY_PATH'),
+    ],
 ];
