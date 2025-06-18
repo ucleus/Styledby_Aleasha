@@ -7,6 +7,7 @@ import BookingPage from './pages/BookingPage';
 import BookingPageTest from './pages/BookingPageTest';
 import PaymentPage from './pages/PaymentPage';
 import LoginPage from './pages/LoginPage';
+import AdminDashboard from './pages/admin/Dashboard';
 
 function App() {
     return (
@@ -18,6 +19,8 @@ function App() {
                 <Route path="payment" element={<PaymentPage />} />
                 <Route path="login" element={<LoginPage />} />
             </Route>
+            {/* Admin routes - separate from main layout */}
+            <Route path="/admin/*" element={<AdminDashboard />} />
         </Routes>
     );
 }

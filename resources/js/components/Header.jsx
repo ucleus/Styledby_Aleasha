@@ -44,6 +44,7 @@ const Header = () => {
     if (user) {
       return [
         ...baseLinks,
+        { to: '/admin', label: 'Admin', admin: true }, // Admin link for logged in users
         { 
           action: 'profile', 
           label: user.displayName || user.email?.split('@')[0] || 'Profile',
@@ -54,6 +55,7 @@ const Header = () => {
     } else {
       return [
         ...baseLinks,
+        { to: '/admin', label: 'Admin', admin: true }, // Admin link for development
         { to: '/login', label: 'Login' }
       ];
     }
@@ -99,6 +101,8 @@ const Header = () => {
                       className={`${
                         link.highlight 
                           ? 'bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700' 
+                          : link.admin
+                          ? 'text-orange-600 hover:text-orange-700 font-semibold'
                           : 'text-gray-800 hover:text-purple-600'
                       } transition font-medium`}
                     >
@@ -183,7 +187,11 @@ const Header = () => {
                     <Link 
                       to={link.to}
                       onClick={() => handleNavigation(link.to)}
-                      className="block w-full text-left px-4 py-3 rounded-md transition text-gray-800 hover:bg-purple-50 hover:text-purple-600"
+                      className={`block w-full text-left px-4 py-3 rounded-md transition ${
+                        link.admin
+                          ? 'text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-semibold'
+                          : 'text-gray-800 hover:bg-purple-50 hover:text-purple-600'
+                      }`}
                     >
                       {link.label}
                     </Link>
