@@ -110,22 +110,22 @@ const CalendarBooking = ({ selectedService, onDateTimeSelect }) => {
     const calendarDays = generateCalendarDays();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Calendar */}
-            <Card className="p-4">
-                <div className="flex items-center justify-between mb-4">
+            <Card className="p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <button
                         onClick={() => navigateMonth(-1)}
-                        className="p-2 hover:bg-gray-100 rounded"
+                        className="p-2 hover:bg-gray-100 rounded text-lg sm:text-xl"
                     >
                         ←
                     </button>
-                    <h3 className="text-lg font-semibold">
+                    <h3 className="text-base sm:text-lg font-semibold">
                         {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </h3>
                     <button
                         onClick={() => navigateMonth(1)}
-                        className="p-2 hover:bg-gray-100 rounded"
+                        className="p-2 hover:bg-gray-100 rounded text-lg sm:text-xl"
                     >
                         →
                     </button>
@@ -134,7 +134,7 @@ const CalendarBooking = ({ selectedService, onDateTimeSelect }) => {
                 {/* Days of week */}
                 <div className="grid grid-cols-7 gap-1 mb-2">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                        <div key={day} className="text-center text-sm font-medium text-gray-500 p-2">
+                        <div key={day} className="text-center text-xs sm:text-sm font-medium text-gray-500 p-1 sm:p-2">
                             {day}
                         </div>
                     ))}
@@ -153,10 +153,10 @@ const CalendarBooking = ({ selectedService, onDateTimeSelect }) => {
                                 onClick={() => !disabled && handleDateSelect(date)}
                                 disabled={disabled}
                                 className={`
-                                    p-2 text-sm rounded transition-colors
+                                    p-2 sm:p-3 text-xs sm:text-sm rounded transition-colors min-h-[36px] sm:min-h-[44px]
                                     ${disabled 
                                         ? 'text-gray-300 cursor-not-allowed' 
-                                        : 'hover:bg-purple-100 cursor-pointer'
+                                        : 'hover:bg-purple-100 cursor-pointer active:bg-purple-200'
                                     }
                                     ${isSelected ? 'bg-purple-600 text-white' : ''}
                                     ${isToday(date) && !isSelected ? 'bg-purple-100 font-semibold' : ''}
@@ -172,39 +172,39 @@ const CalendarBooking = ({ selectedService, onDateTimeSelect }) => {
 
             {/* Available Times */}
             {selectedDate && (
-                <Card className="p-4">
-                    <h4 className="text-lg font-semibold mb-4">
+                <Card className="p-3 sm:p-4">
+                    <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                         Available Times for {formatDate(new Date(selectedDate))}
                     </h4>
                     
                     {loading ? (
-                        <div className="text-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                            <p className="mt-2 text-gray-600">Loading available times...</p>
+                        <div className="text-center py-6 sm:py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600 mx-auto"></div>
+                            <p className="mt-2 text-gray-600 text-sm sm:text-base">Loading available times...</p>
                         </div>
                     ) : availableSlots.length > 0 ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                             {availableSlots.map((slot, index) => (
                                 <button
                                     key={index}
                                     onClick={() => handleTimeSelect(slot)}
-                                    className="p-3 border rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-colors text-center"
+                                    className="p-2 sm:p-3 border rounded-lg hover:border-purple-500 hover:bg-purple-50 active:bg-purple-100 transition-colors text-center text-sm sm:text-base"
                                 >
                                     {formatTime(slot.start_at)}
                                 </button>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-gray-500">
-                            <p>No available times for this date.</p>
-                            <p className="text-sm mt-1">Please select another date.</p>
+                        <div className="text-center py-6 sm:py-8 text-gray-500">
+                            <p className="text-sm sm:text-base">No available times for this date.</p>
+                            <p className="text-xs sm:text-sm mt-1">Please select another date.</p>
                         </div>
                     )}
                 </Card>
             )}
 
             {/* Integration Status */}
-            <div className="text-center text-sm text-gray-500 border-t pt-4">
+            <div className="text-center text-xs sm:text-sm text-gray-500 border-t pt-3 sm:pt-4 space-y-1">
                 <p>🗓️ Calendar integration with Google Calendar ready</p>
                 <p>Availability checked in real-time to prevent double bookings</p>
             </div>

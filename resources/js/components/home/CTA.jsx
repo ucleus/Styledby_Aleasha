@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const CTA = () => {
   return (
-    <section className="h-screen w-full bg-purple-600 text-white flex items-center justify-center">
+    <section className="py-16 bg-purple-600 text-white">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold font-playfair mb-6">Ready for a Fresh New Look?</h2>
         <p className="text-lg mb-8 max-w-2xl mx-auto">

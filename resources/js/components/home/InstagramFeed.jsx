@@ -10,7 +10,7 @@ const InstagramFeed = () => {
   }));
 
   return (
-    <section className="h-screen w-full bg-gray-50 flex items-center" id="instagram">
+    <section className="py-16 bg-gray-50" id="instagram">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-playfair mb-4">Follow Us on Instagram</h2>

@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
-    signOut,
-    onAuthStateChanged
-} from 'firebase/auth';
-import { auth } from '../firebase';
+// Temporarily commenting out Firebase imports to fix loading issues
+// import { 
+//     signInWithEmailAndPassword,
+//     createUserWithEmailAndPassword,
+//     signInWithPopup,
+//     GoogleAuthProvider,
+//     signOut,
+//     onAuthStateChanged
+// } from 'firebase/auth';
+// import { auth } from '../firebase';
 import axios from 'axios';
 
 const AuthContext = createContext({});
@@ -16,58 +17,37 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false); // Set to false initially
     const [isAdmin, setIsAdmin] = useState(false);
 
+    // Temporarily disable Firebase auth logic
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                const token = await firebaseUser.getIdToken();
-                
-                // Verify with backend
-                try {
-                    const response = await axios.post('/api/auth/verify-token', {
-                        idToken: token
-                    });
-                    
-                    setUser(response.data.data.customer);
-                    setIsAdmin(response.data.data.isAdmin);
-                    
-                    // Set default auth header
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                } catch (error) {
-                    console.error('Token verification failed:', error);
-                    setUser(null);
-                }
-            } else {
-                setUser(null);
-                setIsAdmin(false);
-                delete axios.defaults.headers.common['Authorization'];
-            }
-            setLoading(false);
-        });
-
-        return unsubscribe;
+        // TODO: Re-enable Firebase auth once credentials are configured
+        setLoading(false);
     }, []);
 
     const login = async (email, password) => {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        return result.user;
+        // Temporary mock login
+        console.log('Login attempt:', email);
+        throw new Error('Firebase not configured yet');
     };
 
     const register = async (email, password) => {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        return result.user;
+        // Temporary mock register
+        console.log('Register attempt:', email);
+        throw new Error('Firebase not configured yet');
     };
 
     const loginWithGoogle = async () => {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        return result.user;
+        // Temporary mock Google login
+        console.log('Google login attempt');
+        throw new Error('Firebase not configured yet');
     };
 
     const logout = async () => {
-        await signOut(auth);
+        // Temporary mock logout
+        setUser(null);
+        setIsAdmin(false);
     };
 
     const value = {
