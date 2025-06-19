@@ -12,6 +12,7 @@ class ServiceType extends Model
 
     protected $fillable = [
         'name',
+        'category',
         'duration_min',
         'price_cents',
         'description',

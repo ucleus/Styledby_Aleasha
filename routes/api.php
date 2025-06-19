@@ -7,6 +7,10 @@ use App\Http\Controllers\Api\ServiceTypeController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Api\Admin\BlockedDatesController;
+use App\Http\Controllers\Api\Admin\ServicesController as AdminServicesController;
+use App\Http\Controllers\Api\Admin\AppointmentsController as AdminAppointmentsController;
+use App\Http\Controllers\Api\Admin\BusinessSettingsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -37,4 +41,29 @@ Route::middleware(['auth.firebase'])->group(function () {
 Route::middleware(['auth.firebase', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/availability', [DashboardController::class, 'updateAvailability']);
+    
+    // Blocked Dates Management
+    Route::apiResource('blocked-dates', BlockedDatesController::class);
+    Route::post('/blocked-dates/toggle', [BlockedDatesController::class, 'toggle']);
+    Route::get('/blocked-dates/check', [BlockedDatesController::class, 'check']);
+    
+    // Services Management  
+    Route::apiResource('services', AdminServicesController::class);
+    
+    // Appointments Management
+    Route::apiResource('appointments', AdminAppointmentsController::class);
+    
+    // Business Settings
+    Route::apiResource('settings', BusinessSettingsController::class);
+    Route::get('/settings/key/{key}', [BusinessSettingsController::class, 'getByKey']);
+});
+
+// Public admin routes (for development - remove in production)
+Route::prefix('admin-public')->group(function () {
+    Route::apiResource('blocked-dates', BlockedDatesController::class);
+    Route::post('/blocked-dates/toggle', [BlockedDatesController::class, 'toggle']);
+    Route::get('/blocked-dates/check', [BlockedDatesController::class, 'check']);
+    Route::apiResource('services', AdminServicesController::class);
+    Route::apiResource('appointments', AdminAppointmentsController::class);
+    Route::apiResource('settings', BusinessSettingsController::class);
 });
