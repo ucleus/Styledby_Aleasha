@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Card } from '../../../components/ui/card';
+import NewAppointmentModal from './NewAppointmentModal';
 
 const AdminAppointments = () => {
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
 
     // Mock appointments data
     const appointments = [
@@ -106,7 +108,10 @@ const AdminAppointments = () => {
                         onChange={(e) => setSelectedDate(e.target.value)}
                         className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     />
-                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition-colors">
+                    <button 
+                        onClick={() => setShowNewAppointmentModal(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition-colors"
+                    >
                         New Appointment
                     </button>
                 </div>
@@ -237,6 +242,18 @@ const AdminAppointments = () => {
                     </div>
                 </Card>
             </div>
+
+            {/* New Appointment Modal */}
+            <NewAppointmentModal 
+                isOpen={showNewAppointmentModal}
+                onClose={() => setShowNewAppointmentModal(false)}
+                onSuccess={(appointment) => {
+                    console.log('New appointment created:', appointment);
+                    setShowNewAppointmentModal(false);
+                    // TODO: Refresh appointments list
+                    alert(`Appointment created successfully for ${appointment.customer.name}!`);
+                }}
+            />
         </div>
     );
 };

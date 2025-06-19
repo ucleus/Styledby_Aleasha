@@ -34,7 +34,7 @@ In your `.env` file, update the database credentials from Hostinger:
 ```env
 # Database Configuration (from Hostinger)
 DB_CONNECTION=mysql
-DB_HOST=your_hostinger_host       # Usually: mysqlXX.hostinger.com
+DB_HOST=127.0.0.1        # Usually: mysqlXX.hostinger.com
 DB_PORT=3306
 DB_DATABASE=your_database_name    # From Hostinger panel
 DB_USERNAME=your_db_username      # From Hostinger panel

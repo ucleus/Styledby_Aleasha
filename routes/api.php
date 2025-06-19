@@ -52,6 +52,7 @@ Route::middleware(['auth.firebase', 'admin'])->prefix('admin')->group(function (
     
     // Appointments Management
     Route::apiResource('appointments', AdminAppointmentsController::class);
+    Route::get('/appointments-stats', [AdminAppointmentsController::class, 'stats']);
     
     // Business Settings
     Route::apiResource('settings', BusinessSettingsController::class);
@@ -65,5 +66,6 @@ Route::prefix('admin-public')->group(function () {
     Route::get('/blocked-dates/check', [BlockedDatesController::class, 'check']);
     Route::apiResource('services', AdminServicesController::class);
     Route::apiResource('appointments', AdminAppointmentsController::class);
+    Route::get('/appointments-stats', [AdminAppointmentsController::class, 'stats']);
     Route::apiResource('settings', BusinessSettingsController::class);
 });

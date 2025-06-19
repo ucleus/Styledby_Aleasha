@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../../../components/ui/card';
+import NewAppointmentModal from './NewAppointmentModal';
 
 const AdminOverview = () => {
+    const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
+    
+    console.log('AdminOverview render - showNewAppointmentModal:', showNewAppointmentModal);
+    
     // Mock data - in real app this would come from API
     const stats = {
         todayAppointments: 5,
@@ -148,7 +153,15 @@ const AdminOverview = () => {
             <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button className="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                    <button 
+                        onClick={() => {
+                            alert('Button clicked!');
+                            console.log('Button clicked - setting modal to true');
+                            setShowNewAppointmentModal(true);
+                        }}
+                        className="flex flex-col items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors relative z-10 cursor-pointer"
+                        style={{ pointerEvents: 'auto' }}
+                    >
                         <span className="text-2xl mb-2">📅</span>
                         <span className="text-sm font-medium">New Appointment</span>
                     </button>
@@ -166,6 +179,18 @@ const AdminOverview = () => {
                     </button>
                 </div>
             </Card>
+
+            {/* New Appointment Modal */}
+            <NewAppointmentModal 
+                isOpen={showNewAppointmentModal}
+                onClose={() => setShowNewAppointmentModal(false)}
+                onSuccess={(appointment) => {
+                    console.log('New appointment created:', appointment);
+                    setShowNewAppointmentModal(false);
+                    // TODO: Refresh appointments list or show success message
+                    alert(`Appointment created successfully for ${appointment.customer.name}!`);
+                }}
+            />
         </div>
     );
 };

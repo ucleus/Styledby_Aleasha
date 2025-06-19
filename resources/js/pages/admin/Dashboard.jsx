@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import AdminOverview from './components/AdminOverview';
 import AdminAppointments from './components/AdminAppointments';
 import AdminServices from './components/AdminServices';
@@ -9,8 +8,12 @@ import AdminSettings from './components/AdminSettings';
 
 const Dashboard = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const logout = () => {
+    // Simple logout - redirect to home page
+    window.location.href = '/';
+  };
 
   const navigationItems = [
     { path: '/admin', label: 'Overview', icon: '📊' },
