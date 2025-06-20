@@ -168,15 +168,32 @@ class AppointmentsController extends Controller
     }
 
     /**
-     * Update appointment status
+     * Update appointment
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|in:booked,paid,completed,canceled',
-            'notes' => 'sometimes|nullable|string|max:1000',
-            'amount_paid_cents' => 'sometimes|integer|min:0'
-        ]);
+        // Check if this is a simple status update or full appointment update
+        if ($request->has('customer') || $request->has('service_type_id')) {
+            // Full appointment update
+            $validator = Validator::make($request->all(), [
+                'customer.name' => 'required|string|max:255',
+                'customer.email' => 'required|email|max:255',
+                'customer.phone' => 'required|string|max:20',
+                'service_type_id' => 'required|exists:service_types,id',
+                'start_at' => 'required|date',
+                'end_at' => 'required|date|after:start_at',
+                'status' => 'required|in:booked,paid,completed,canceled',
+                'notes' => 'nullable|string|max:1000',
+                'amount_paid_cents' => 'integer|min:0'
+            ]);
+        } else {
+            // Simple status update
+            $validator = Validator::make($request->all(), [
+                'status' => 'sometimes|in:booked,paid,completed,canceled',
+                'notes' => 'sometimes|nullable|string|max:1000',
+                'amount_paid_cents' => 'sometimes|integer|min:0'
+            ]);
+        }
 
         if ($validator->fails()) {
             return response()->json([
@@ -187,22 +204,63 @@ class AppointmentsController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
             $appointment = Appointment::findOrFail($id);
-            
-            $appointment->update($request->only([
-                'status', 'notes', 'amount_paid_cents'
-            ]));
+
+            if ($request->has('customer')) {
+                // Update customer information
+                $customer = $appointment->customer;
+                $customer->update([
+                    'name' => $request->customer['name'],
+                    'phone' => $request->customer['phone'],
+                    // Note: Don't update email as it's the primary identifier
+                ]);
+
+                // Update appointment details
+                $appointment->update([
+                    'service_type_id' => $request->service_type_id,
+                    'start_at' => $request->start_at,
+                    'end_at' => $request->end_at,
+                    'status' => $request->status,
+                    'amount_paid_cents' => $request->amount_paid_cents ?? 0,
+                    'notes' => $request->notes,
+                ]);
+            } else {
+                // Simple update
+                $appointment->update($request->only([
+                    'status', 'notes', 'amount_paid_cents'
+                ]));
+            }
+
+            DB::commit();
+
+            // Load relationships for response
+            $appointment->load(['customer', 'serviceType']);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Appointment updated successfully',
                 'data' => [
                     'id' => $appointment->id,
+                    'customer' => [
+                        'name' => $appointment->customer->name,
+                        'email' => $appointment->customer->email,
+                        'phone' => $appointment->customer->phone,
+                    ],
+                    'service' => [
+                        'name' => $appointment->serviceType->name,
+                        'duration' => $appointment->serviceType->duration_min,
+                        'price' => $appointment->serviceType->price_cents / 100,
+                    ],
+                    'date' => $appointment->start_at->format('Y-m-d'),
+                    'time' => $appointment->start_at->format('H:i'),
                     'status' => $appointment->status,
                 ]
             ]);
 
         } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update appointment: ' . $e->getMessage()
