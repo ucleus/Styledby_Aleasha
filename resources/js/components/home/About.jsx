@@ -6,7 +6,24 @@ const About = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-12">
           <div className="md:w-1/2">
-            <div className="h-96 bg-gray-200 rounded-lg"></div>
+            <div className="relative h-96 rounded-lg overflow-hidden shadow-lg">
+              <img 
+                src="/images/about.jpg" 
+                alt="Aleasha - Professional Hair Stylist"
+                className="w-full h-full object-cover"
+                onLoad={(e) => {
+                  console.log('About image loaded successfully!');
+                  e.target.style.opacity = '1';
+                }}
+                onError={(e) => {
+                  console.error('About image failed to load:', e.target.src);
+                  // Fallback to gray background if image fails to load
+                  e.target.style.display = 'none';
+                  e.target.parentElement.classList.add('bg-gray-200');
+                }}
+                style={{ opacity: 0, transition: 'opacity 0.5s ease-in-out' }}
+              />
+            </div>
           </div>
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold font-playfair mb-6">About Aleasha</h2>

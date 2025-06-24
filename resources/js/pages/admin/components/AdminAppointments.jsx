@@ -7,8 +7,16 @@ import ConfirmationModal from '../../../components/ui/ConfirmationModal';
 import NotificationModal from '../../../components/ui/NotificationModal';
 
 const AdminAppointments = () => {
+    // Helper function to get local date in YYYY-MM-DD format
+    const getLocalDateString = (date = new Date()) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const [selectedFilter, setSelectedFilter] = useState('all');
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(getLocalDateString());
     const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
     const [showEditAppointmentModal, setShowEditAppointmentModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -105,30 +113,55 @@ const AdminAppointments = () => {
         setNotificationModal(prev => ({ ...prev, isOpen: false }));
     };
 
-    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+    const todayDateString = getLocalDateString();
+    const isToday = selectedDate === todayDateString;
     const selectedDateAppointments = appointments.filter(a => a.date === selectedDate);
+    
+    const activeAppointments = appointments.filter(a => a.status !== 'completed');
+    const activeSelectedDateAppointments = selectedDateAppointments.filter(a => a.status !== 'completed');
+    
+    // Past due appointments: scheduled before today and not completed/canceled
+    const pastDueAppointments = appointments.filter(a => 
+        a.date < todayDateString && 
+        a.status !== 'completed' && 
+        a.status !== 'canceled'
+    );
     
     const filters = [
         { 
             key: 'all', 
-            label: isToday ? 'All Appointments' : `All (${selectedDateAppointments.length} on selected date)`, 
-            count: isToday ? appointments.length : selectedDateAppointments.length 
+            label: isToday ? 'All Active' : `All Active (${activeSelectedDateAppointments.length} on selected date)`, 
+            count: isToday ? activeAppointments.length : activeSelectedDateAppointments.length 
         },
-        { key: 'today', label: 'Today', count: appointments.filter(a => a.date === new Date().toISOString().split('T')[0]).length },
+        { 
+            key: 'today', 
+            label: 'Today', 
+            count: appointments.filter(a => a.date === todayDateString && a.status !== 'completed').length 
+        },
+        { 
+            key: 'pastdue', 
+            label: 'Past Due', 
+            count: pastDueAppointments.length 
+        },
         { 
             key: 'confirmed', 
             label: 'Confirmed', 
-            count: isToday ? appointments.filter(a => a.status === 'confirmed' || a.status === 'paid').length : selectedDateAppointments.filter(a => a.status === 'confirmed' || a.status === 'paid').length
+            count: isToday ? activeAppointments.filter(a => a.status === 'confirmed' || a.status === 'paid').length : activeSelectedDateAppointments.filter(a => a.status === 'confirmed' || a.status === 'paid').length
         },
         { 
             key: 'pending', 
             label: 'Pending', 
-            count: isToday ? appointments.filter(a => a.status === 'pending' || a.status === 'booked').length : selectedDateAppointments.filter(a => a.status === 'pending' || a.status === 'booked').length
+            count: isToday ? activeAppointments.filter(a => a.status === 'pending' || a.status === 'booked').length : activeSelectedDateAppointments.filter(a => a.status === 'pending' || a.status === 'booked').length
         },
         { 
             key: 'canceled', 
             label: 'Canceled', 
-            count: isToday ? appointments.filter(a => a.status === 'canceled').length : selectedDateAppointments.filter(a => a.status === 'canceled').length
+            count: isToday ? activeAppointments.filter(a => a.status === 'canceled').length : activeSelectedDateAppointments.filter(a => a.status === 'canceled').length
+        },
+        { 
+            key: 'completed', 
+            label: 'Completed', 
+            count: isToday ? appointments.filter(a => a.status === 'completed').length : selectedDateAppointments.filter(a => a.status === 'completed').length
         },
     ];
 
@@ -138,7 +171,10 @@ const AdminAppointments = () => {
         // First, determine base filter
         switch (selectedFilter) {
             case 'today':
-                filtered = appointments.filter(a => a.date === new Date().toISOString().split('T')[0]);
+                filtered = appointments.filter(a => a.date === todayDateString && a.status !== 'completed');
+                break;
+            case 'pastdue':
+                filtered = pastDueAppointments;
                 break;
             case 'confirmed':
                 filtered = appointments.filter(a => a.status === 'confirmed' || a.status === 'paid');
@@ -149,12 +185,16 @@ const AdminAppointments = () => {
             case 'canceled':
                 filtered = appointments.filter(a => a.status === 'canceled');
                 break;
+            case 'completed':
+                filtered = appointments.filter(a => a.status === 'completed');
+                break;
             default:
-                filtered = appointments;
+                // "All Active" - exclude completed appointments by default
+                filtered = appointments.filter(a => a.status !== 'completed');
         }
 
-        // Apply date filter if a specific date is selected (and it's not "today" filter)
-        if (selectedFilter !== 'today' && !isToday) {
+        // Apply date filter if a specific date is selected (and it's not "today" or "pastdue" filter)
+        if (selectedFilter !== 'today' && selectedFilter !== 'pastdue' && !isToday) {
             filtered = filtered.filter(a => a.date === selectedDate);
         }
 
@@ -171,11 +211,20 @@ const AdminAppointments = () => {
         });
     };
 
+    const isPastDue = (appointment) => {
+        return appointment.date < todayDateString && 
+               appointment.status !== 'completed' && 
+               appointment.status !== 'canceled';
+    };
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
             case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+            case 'booked': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'paid': return 'bg-green-100 text-green-800 border-green-200';
+            case 'completed': return 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'canceled': return 'bg-red-100 text-red-800 border-red-200';
             default: return 'bg-gray-100 text-gray-800 border-gray-200';
         }
     };
@@ -200,6 +249,11 @@ const AdminAppointments = () => {
             booked: {
                 title: 'Reactivate Appointment',
                 message: `Are you sure you want to reactivate the appointment for ${clientName}?`,
+                type: 'success'
+            },
+            completed: {
+                title: 'Mark as Completed',
+                message: `Are you sure you want to mark the appointment for ${clientName} as completed? This will move it to the completed appointments.`,
                 type: 'success'
             }
         };
@@ -372,7 +426,7 @@ const AdminAppointments = () => {
                         </div>
                         {!isToday && (
                             <button
-                                onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+                                onClick={() => setSelectedDate(todayDateString)}
                                 className="px-2 py-1 text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 rounded transition-colors whitespace-nowrap"
                                 title="Clear date filter"
                             >
@@ -434,6 +488,11 @@ const AdminAppointments = () => {
                                             <span className={`px-2 py-1 text-xs rounded-full ${getPaymentStatusColor(appointment.paymentStatus)}`}>
                                                 {appointment.paymentStatus}
                                             </span>
+                                            {isPastDue(appointment) && (
+                                                <span className="px-2 py-1 text-xs rounded-full bg-red-500 text-white border-red-600">
+                                                    ⚠️ OVERDUE
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -492,6 +551,14 @@ const AdminAppointments = () => {
                                                 className="px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors"
                                             >
                                                 Confirm
+                                            </button>
+                                        )}
+                                        {appointment.status === 'paid' && (
+                                            <button
+                                                onClick={() => updateAppointmentStatus(appointment.id, 'completed', appointment.client.name)}
+                                                className="px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors"
+                                            >
+                                                ✓ Mark Complete
                                             </button>
                                         )}
                                         {appointment.status === 'canceled' && (
@@ -589,9 +656,16 @@ const AdminAppointments = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex px-2 py-1 text-xs rounded-full border ${getStatusColor(appointment.status)}`}>
-                                                    {appointment.status}
-                                                </span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className={`inline-flex px-2 py-1 text-xs rounded-full border ${getStatusColor(appointment.status)}`}>
+                                                        {appointment.status}
+                                                    </span>
+                                                    {isPastDue(appointment) && (
+                                                        <span className="inline-flex px-2 py-1 text-xs rounded-full bg-red-500 text-white border-red-600">
+                                                            ⚠️ OVERDUE
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex px-2 py-1 text-xs rounded-full ${getPaymentStatusColor(appointment.paymentStatus)}`}>
@@ -623,6 +697,15 @@ const AdminAppointments = () => {
                                                             className="text-green-600 hover:text-green-900"
                                                         >
                                                             Confirm
+                                                        </button>
+                                                    )}
+                                                    {appointment.status === 'paid' && (
+                                                        <button
+                                                            onClick={() => updateAppointmentStatus(appointment.id, 'completed', appointment.client.name)}
+                                                            className="text-purple-600 hover:text-purple-900"
+                                                            title="Mark as Completed"
+                                                        >
+                                                            ✓ Complete
                                                         </button>
                                                     )}
                                                     {appointment.status === 'canceled' && (
