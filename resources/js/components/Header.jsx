@@ -44,7 +44,6 @@ const Header = () => {
     if (user) {
       return [
         ...baseLinks,
-        { to: '/admin', label: 'Admin', admin: true }, // Admin link for logged in users
         { 
           action: 'profile', 
           label: user.displayName || user.email?.split('@')[0] || 'Profile',
@@ -55,7 +54,6 @@ const Header = () => {
     } else {
       return [
         ...baseLinks,
-        { to: '/admin', label: 'Admin', admin: true }, // Admin link for development
         { to: '/login', label: 'Login' }
       ];
     }
