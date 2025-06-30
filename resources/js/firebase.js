@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
+// Check if Firebase config is available
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -10,5 +11,25 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// Validate Firebase config
+const isFirebaseConfigured = firebaseConfig.apiKey && 
+    firebaseConfig.authDomain && 
+    firebaseConfig.projectId &&
+    !firebaseConfig.apiKey.includes('placeholder');
+
+let app = null;
+let auth = null;
+
+if (isFirebaseConfigured) {
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization failed:', error);
+    }
+} else {
+    console.warn('Firebase configuration not found or incomplete. Using development mode.');
+}
+
+export { app, auth, isFirebaseConfigured };

@@ -8,6 +8,8 @@ import BookingPageTest from './pages/BookingPageTest';
 import PaymentPage from './pages/PaymentPage';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/admin/Dashboard';
+import AdminLogin from './pages/admin/AdminLogin';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     return (
@@ -20,7 +22,17 @@ function App() {
                 <Route path="login" element={<LoginPage />} />
             </Route>
             {/* Admin routes - separate from main layout */}
-            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={
+                <ProtectedRoute requireAdmin={true}>
+                    <AdminDashboard />
+                </ProtectedRoute>
+            } />
+            <Route path="/admin/*" element={
+                <ProtectedRoute requireAdmin={true}>
+                    <AdminDashboard />
+                </ProtectedRoute>
+            } />
         </Routes>
     );
 }

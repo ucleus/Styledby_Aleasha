@@ -19,3 +19,7 @@ yarn-error.log
 /.vscode
 
 **/.claude/settings.local.json
+
+# Firebase Service Account Keys (NEVER COMMIT THESE!)
+serviceAccountKey.json
+*-firebase-adminsdk-*.json

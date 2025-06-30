@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ServiceTypeController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Api\Admin\BlockedDatesController;
 use App\Http\Controllers\Api\Admin\ServicesController as AdminServicesController;
 use App\Http\Controllers\Api\Admin\AppointmentsController as AdminAppointmentsController;
@@ -57,6 +58,9 @@ Route::middleware(['auth.firebase', 'admin'])->prefix('admin')->group(function (
     // Business Settings
     Route::apiResource('settings', BusinessSettingsController::class);
     Route::get('/settings/key/{key}', [BusinessSettingsController::class, 'getByKey']);
+    
+    // Clients Management
+    Route::apiResource('clients', ClientController::class);
 });
 
 // Public admin routes (for development - remove in production)
@@ -68,4 +72,5 @@ Route::prefix('admin-public')->group(function () {
     Route::apiResource('appointments', AdminAppointmentsController::class);
     Route::get('/appointments-stats', [AdminAppointmentsController::class, 'stats']);
     Route::apiResource('settings', BusinessSettingsController::class);
+    Route::apiResource('clients', ClientController::class);
 });
