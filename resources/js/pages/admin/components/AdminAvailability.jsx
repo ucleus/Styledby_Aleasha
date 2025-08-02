@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Card } from '../../../components/ui/card';
 
 const AdminAvailability = () => {
     const [selectedDate, setSelectedDate] = useState(null);
-    const [blockedDates, setBlockedDates] = useState([
-        '2025-06-20', '2025-06-25', '2025-07-04' // Example blocked dates
-    ]);
+    const [blockedDates, setBlockedDates] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [blockType, setBlockType] = useState('full-day'); // 'full-day' or 'partial'
     const [timeSlots, setTimeSlots] = useState({
@@ -53,17 +52,22 @@ const AdminAvailability = () => {
         return date < today;
     };
 
-    const toggleDateBlock = (date) => {
+    const toggleDateBlock = async (date) => {
         if (!date || isPastDate(date)) return;
-        
+
         const dateStr = formatDate(date);
-        setBlockedDates(prev => {
-            if (prev.includes(dateStr)) {
-                return prev.filter(d => d !== dateStr);
-            } else {
-                return [...prev, dateStr];
-            }
-        });
+        try {
+            await axios.post('/api/admin/blocked-dates/toggle', { date: dateStr });
+            setBlockedDates(prev => {
+                if (prev.includes(dateStr)) {
+                    return prev.filter(d => d !== dateStr);
+                } else {
+                    return [...prev, dateStr];
+                }
+            });
+        } catch (error) {
+            console.error('Failed to toggle date:', error);
+        }
     };
 
     const navigateMonth = (direction) => {
@@ -81,10 +85,22 @@ const AdminAvailability = () => {
 
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+    useEffect(() => {
+        const fetchBlockedDates = async () => {
+            try {
+                const response = await axios.get('/api/admin/blocked-dates');
+                const dates = response.data.data.map(d => d.date);
+                setBlockedDates(dates);
+            } catch (error) {
+                console.error('Failed to load blocked dates:', error);
+            }
+        };
+        fetchBlockedDates();
+    }, []);
+
     const saveBlockedDates = () => {
-        // TODO: Send blocked dates to backend
-        console.log('Saving blocked dates:', blockedDates);
-        alert('Blocked dates saved successfully!');
+        console.log('Blocked dates:', blockedDates);
+        alert('Blocked dates updated!');
     };
 
     return (
