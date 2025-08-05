@@ -128,14 +128,22 @@ class AppointmentController extends BaseController
 
     public function cancel($id, Request $request): JsonResponse
     {
+        $request->validate([
+            'firebase_uid' => 'required|string',
+        ]);
+
         $appointment = Appointment::find($id);
-        
+
         if (!$appointment) {
             return $this->sendError('Appointment not found', [], HttpStatusCodes::NOT_FOUND);
         }
 
         $customer = Customer::where('firebase_uid', $request->firebase_uid)->first();
-        
+
+        if (!$customer) {
+            return $this->sendError('Customer not found', [], HttpStatusCodes::NOT_FOUND);
+        }
+
         if ($appointment->customer_id !== $customer->id) {
             return $this->sendError('Unauthorized', [], HttpStatusCodes::FORBIDDEN);
         }
