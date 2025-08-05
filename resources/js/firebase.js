@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getMessaging } from 'firebase/messaging';
 import { getMessaging, getToken } from 'firebase/messaging';
 
 // Check if Firebase config is available
@@ -26,6 +27,11 @@ if (isFirebaseConfigured) {
     try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
+        try {
+            messaging = getMessaging(app);
+        } catch (error) {
+            console.warn('Firebase messaging not supported:', error);
+        }
         messaging = getMessaging(app);
         console.log('Firebase initialized successfully');
     } catch (error) {
@@ -35,6 +41,7 @@ if (isFirebaseConfigured) {
     console.warn('Firebase configuration not found or incomplete. Using development mode.');
 }
 
+export { app, auth, messaging, isFirebaseConfigured };
 export const requestNotificationPermission = async (swRegistration) => {
     if (!messaging) return null;
 
