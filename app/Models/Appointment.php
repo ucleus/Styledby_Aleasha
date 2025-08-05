@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Jobs\SendAppointmentReminder;
 
 class Appointment extends Model
 {
@@ -34,5 +35,25 @@ class Appointment extends Model
     public function serviceType(): BelongsTo
     {
         return $this->belongsTo(ServiceType::class);
+    }
+
+    protected static function booted(): void
+    {
+        $dispatcher = function (Appointment $appointment) {
+            if (
+                $appointment->status === 'paid' &&
+                $appointment->start_at
+            ) {
+                SendAppointmentReminder::dispatch($appointment)
+                    ->delay($appointment->start_at->copy()->subMinutes(15));
+            }
+        };
+
+        static::created($dispatcher);
+        static::updated(function (Appointment $appointment) use ($dispatcher) {
+            if ($appointment->getOriginal('status') !== 'paid') {
+                $dispatcher($appointment);
+            }
+        });
     }
 }
