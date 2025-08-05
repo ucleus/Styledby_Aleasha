@@ -1,69 +1,111 @@
-# Styledby_Aleasha
-A booking platform for a mobile hairstyling business.
+# Styled by Aleasha Booking Platform
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+An interactive booking platform for a mobile hairstyling business, built with [Laravel](https://laravel.com) and [React](https://react.dev). The app lets clients reserve services, handles calendar availability, processes payments, and provides an admin dashboard for managing appointments.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Getting Started](#getting-started)
+- [Customization](#customization)
+  - [Branding & Text](#branding--text)
+  - [Services & Pricing](#services--pricing)
+  - [Scheduling & Integrations](#scheduling--integrations)
+- [Reusing for Another Company](#reusing-for-another-company)
+- [Tech Stack](#tech-stack)
+- [License](#license)
 
-## About Laravel
+## Overview
+Styled by Aleasha streamlines the process of booking mobile hairstyling services. Clients choose a service, pick an available time, enter their details, and optionally pay in advance. Administrators manage availability, upcoming appointments, and configuration through a secure dashboard.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
+<details>
+<summary><strong>Client Booking Flow</strong></summary>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Pick a service from a curated list (cut, color, styling, etc.).
+2. Choose an open date and time that respects the stylist's availability and existing events.
+3. Enter contact information and notes.
+4. Review and confirm the appointment; events are pushed to Google Calendar and stored in the app database.
+</details>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+<details>
+<summary><strong>Admin Dashboard</strong></summary>
 
-## Learning Laravel
+- View upcoming appointments and client details.
+- Manually create, edit, or cancel bookings.
+- Configure service options, business settings, and holiday blocks.
+</details>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+<details>
+<summary><strong>Integrations</strong></summary>
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Google Calendar** for real‑time availability and automatic event creation (see [`GOOGLE_CALENDAR_SETUP.md`](GOOGLE_CALENDAR_SETUP.md)).
+- **Square Payments** for secure card processing ([`app/Services/SquarePaymentService.php`](app/Services/SquarePaymentService.php)).
+- **Firebase** for authentication and notifications.
+</details>
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## How It Works
+1. **Service Selection** – `resources/js/pages/BookingPage.jsx` defines available services with duration and price.
+2. **Availability Check** – `app/Http/Controllers/Api/AvailabilityController.php` queries Google Calendar and the database to prevent double bookings.
+3. **Booking Confirmation** – Once confirmed, appointments are written to the database and calendar; admin notifications are sent via `app/Notifications/AppointmentBooked.php`.
+4. **Administration** – React components under `resources/js/pages/admin/` provide dashboards and settings for staff.
 
-## Laravel Sponsors
+## Getting Started
+1. Clone the repository.
+2. Install PHP dependencies:
+   ```bash
+   composer install
+   ```
+3. Install Node dependencies:
+   ```bash
+   npm install
+   ```
+4. Copy the example environment and set keys:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+5. Configure database credentials and run migrations:
+   ```bash
+   php artisan migrate --seed
+   ```
+6. Build assets and start the development server:
+   ```bash
+   npm run dev
+   php artisan serve
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Customization
+### Branding & Text
+- Update the app name in `.env` (`APP_NAME`) and `config/app.php`.
+- Replace logos or images in the `public/` directory.
+- Edit navigation and copy in React components under `resources/js/`.
 
-### Premium Partners
+### Services & Pricing
+- Modify the service list in [`resources/js/pages/BookingPage.jsx`](resources/js/pages/BookingPage.jsx).
+- Adjust default durations, descriptions, and prices.
+- Seed example data in `database/seeders/` or through the admin dashboard.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Scheduling & Integrations
+- Follow [`GOOGLE_CALENDAR_SETUP.md`](GOOGLE_CALENDAR_SETUP.md) to connect a different Google Calendar.
+- Configure payment credentials in `.env` for Square or swap out `SquarePaymentService` with another provider.
+- Tweak availability rules in `resources/js/pages/admin/components/AdminAvailability.jsx`.
 
-## Contributing
+## Reusing for Another Company
+1. Fork or copy this repository.
+2. Rename brand references (`Styled by Aleasha`) in environment files, React components, and documentation.
+3. Replace logos and color schemes via Tailwind classes or your own CSS.
+4. Update services/pricing to match the new business.
+5. Set up new Google Calendar and payment credentials for the company.
+6. Review `ADMIN_SETUP.md` and other setup guides to adjust admin users and database configuration.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Tech Stack
+- Laravel 10 (PHP backend & API)
+- React 18 with Vite and Tailwind CSS
+- Google Calendar API
+- Square Payments API
+- Firebase (authentication, notifications)
 
 ## License
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
