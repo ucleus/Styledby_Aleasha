@@ -14,6 +14,7 @@ class DeviceToken extends Model
         'customer_id',
         'token',
         'is_admin',
+        'platform',
     ];
 
     public function customer(): BelongsTo

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ServiceTypeController;
 use App\Http\Controllers\Api\AvailabilityController;
 use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Api\Admin\BlockedDatesController;
@@ -36,6 +37,7 @@ Route::middleware(['auth.firebase'])->group(function () {
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::get('/appointments/{id}', [AppointmentController::class, 'show']);
     Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
+    Route::post('/device-tokens', [DeviceTokenController::class, 'store']);
 });
 
 // Admin routes

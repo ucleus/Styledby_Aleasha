@@ -79,12 +79,22 @@ class WebhookController extends Controller
                 'amount_paid_cents' => $data['object']['payment']['amount_money']['amount'] ?? 0,
             ]);
 
+
             $appointment->customer->notify(new PaymentReceived($appointment));
 
             $this->adminNotifier->send(
                 'Appointment Paid',
                 "Appointment #{$appointment->id} has been marked as paid."
             );
+
+            if ($appointment->customer) {
+                $appointment->customer->notify(new PaymentReceived($appointment));
+            } else {
+                Log::warning('No customer associated with appointment for Square payment', [
+                    'order_id' => $orderId,
+                    'payment_id' => $paymentId,
+                ]);
+            }
         } else {
             Log::warning('Appointment not found for Square payment', [
                 'order_id' => $orderId,

@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\ServiceType;
 use App\Services\SquarePaymentService;
 use App\Services\GoogleCalendarService;
+use App\Services\PushNotificationService;
 use App\Notifications\AppointmentBooked;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -18,11 +19,16 @@ class AppointmentController extends BaseController
 {
     protected $squareService;
     protected $googleCalendar;
+    protected $pushNotification;
 
-    public function __construct(SquarePaymentService $squareService, GoogleCalendarService $googleCalendar)
-    {
+    public function __construct(
+        SquarePaymentService $squareService,
+        GoogleCalendarService $googleCalendar,
+        PushNotificationService $pushNotification
+    ) {
         $this->squareService = $squareService;
         $this->googleCalendar = $googleCalendar;
+        $this->pushNotification = $pushNotification;
     }
 
     public function store(Request $request): JsonResponse
@@ -106,6 +112,9 @@ class AppointmentController extends BaseController
             DB::commit();
 
             // Send notifications
+            if (!empty($customer->fcm_token)) {
+                $this->pushNotification->sendAppointmentNotification($customer->fcm_token, $appointment);
+            }
             $customer->notify(new AppointmentBooked($appointment));
 
             return $this->sendResponse([

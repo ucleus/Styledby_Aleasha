@@ -44,4 +44,8 @@ return [
         'calendar_id' => env('GOOGLE_CALENDAR_ID', 'primary'),
         'service_account_key_path' => env('GOOGLE_SERVICE_ACCOUNT_KEY_PATH'),
     ],
+
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
 ];
