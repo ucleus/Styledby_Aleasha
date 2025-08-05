@@ -6,12 +6,17 @@ use App\Constants\HttpStatusCodes;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Notifications\PaymentReceived;
+use App\Services\AdminNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
+    public function __construct(private AdminNotificationService $adminNotifier)
+    {
+    }
+
     public function handleSquareWebhook(Request $request): JsonResponse
     {
         $signature = $request->header('x-square-hmacsha256-signature');
@@ -75,6 +80,11 @@ class WebhookController extends Controller
             ]);
 
             $appointment->customer->notify(new PaymentReceived($appointment));
+
+            $this->adminNotifier->send(
+                'Appointment Paid',
+                "Appointment #{$appointment->id} has been marked as paid."
+            );
         } else {
             Log::warning('Appointment not found for Square payment', [
                 'order_id' => $orderId,

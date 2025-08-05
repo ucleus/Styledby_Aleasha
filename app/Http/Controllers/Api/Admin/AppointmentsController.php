@@ -10,9 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Services\AdminNotificationService;
 
 class AppointmentsController extends Controller
 {
+    public function __construct(private AdminNotificationService $adminNotifier)
+    {
+    }
+
     /**
      * Display a listing of appointments
      */
@@ -207,6 +212,7 @@ class AppointmentsController extends Controller
             DB::beginTransaction();
 
             $appointment = Appointment::findOrFail($id);
+            $previousStatus = $appointment->status;
 
             if ($request->has('customer')) {
                 // Update customer information
@@ -234,6 +240,13 @@ class AppointmentsController extends Controller
             }
 
             DB::commit();
+
+            if ($previousStatus !== 'completed' && $appointment->status === 'completed') {
+                $this->adminNotifier->send(
+                    'Appointment Completed',
+                    "Appointment #{$appointment->id} has been marked as completed."
+                );
+            }
 
             // Load relationships for response
             $appointment->load(['customer', 'serviceType']);
