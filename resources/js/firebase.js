@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getMessaging } from 'firebase/messaging';
+import { getMessaging, getToken } from 'firebase/messaging';
 
 // Check if Firebase config is available
 const firebaseConfig = {
@@ -31,6 +32,7 @@ if (isFirebaseConfigured) {
         } catch (error) {
             console.warn('Firebase messaging not supported:', error);
         }
+        messaging = getMessaging(app);
         console.log('Firebase initialized successfully');
     } catch (error) {
         console.error('Firebase initialization failed:', error);
@@ -40,3 +42,22 @@ if (isFirebaseConfigured) {
 }
 
 export { app, auth, messaging, isFirebaseConfigured };
+export const requestNotificationPermission = async (swRegistration) => {
+    if (!messaging) return null;
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            return await getToken(messaging, {
+                vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                serviceWorkerRegistration: swRegistration,
+            });
+        }
+    } catch (error) {
+        console.error('Unable to get notification permission or token:', error);
+    }
+
+    return null;
+};
+
+export { app, auth, isFirebaseConfigured, messaging };

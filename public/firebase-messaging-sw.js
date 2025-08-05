@@ -1,3 +1,4 @@
+
 importScripts('https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.9.0/firebase-messaging-compat.js');
 
@@ -28,3 +29,16 @@ self.addEventListener('notificationclick', (event) => {
     event.waitUntil(clients.openWindow(url));
   }
 });
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+    apiKey: 'placeholder',
+    authDomain: 'placeholder',
+    projectId: 'placeholder',
+    storageBucket: 'placeholder',
+    messagingSenderId: 'placeholder',
+    appId: 'placeholder',
+});
+
+firebase.messaging();
