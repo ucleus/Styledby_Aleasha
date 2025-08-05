@@ -50,7 +50,11 @@ class AppointmentController extends BaseController
             $isBooked = Appointment::where('status', '!=', 'canceled')
                 ->where(function ($query) use ($startAt, $endAt) {
                     $query->whereBetween('start_at', [$startAt, $endAt])
-                        ->orWhereBetween('end_at', [$startAt, $endAt]);
+                        ->orWhereBetween('end_at', [$startAt, $endAt])
+                        ->orWhere(function ($query) use ($startAt, $endAt) {
+                            $query->where('start_at', '<', $startAt)
+                                  ->where('end_at', '>', $endAt);
+                        });
                 })
                 ->exists();
 
