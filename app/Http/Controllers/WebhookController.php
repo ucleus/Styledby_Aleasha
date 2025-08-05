@@ -31,7 +31,7 @@ class WebhookController extends Controller
 
         $data = json_decode($body, true);
 
-        if (!isset($data['type'])) {
+        if (!is_array($data) || !isset($data['type'], $data['data'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid webhook payload'
