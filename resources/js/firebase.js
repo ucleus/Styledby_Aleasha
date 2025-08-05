@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getMessaging } from 'firebase/messaging';
 
 // Check if Firebase config is available
 const firebaseConfig = {
@@ -19,11 +20,17 @@ const isFirebaseConfigured = firebaseConfig.apiKey &&
 
 let app = null;
 let auth = null;
+let messaging = null;
 
 if (isFirebaseConfigured) {
     try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
+        try {
+            messaging = getMessaging(app);
+        } catch (error) {
+            console.warn('Firebase messaging not supported:', error);
+        }
         console.log('Firebase initialized successfully');
     } catch (error) {
         console.error('Firebase initialization failed:', error);
@@ -32,4 +39,4 @@ if (isFirebaseConfigured) {
     console.warn('Firebase configuration not found or incomplete. Using development mode.');
 }
 
-export { app, auth, isFirebaseConfigured };
+export { app, auth, messaging, isFirebaseConfigured };
