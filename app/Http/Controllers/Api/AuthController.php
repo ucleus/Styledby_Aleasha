@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Kreait\Laravel\Firebase\Facades\Firebase;
+use App\Constants\HttpStatusCodes;
 
 class AuthController extends BaseController
 {
