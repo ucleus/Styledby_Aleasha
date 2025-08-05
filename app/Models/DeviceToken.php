@@ -13,6 +13,7 @@ class DeviceToken extends Model
     protected $fillable = [
         'customer_id',
         'token',
+        'is_admin',
         'platform',
     ];
 
