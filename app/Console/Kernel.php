@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Models\Appointment;
 use App\Notifications\AppointmentReminder;
+use App\Jobs\SendAppointmentReminder;
 use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
@@ -15,6 +16,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Send push reminders 15 minutes before appointment start
+        $schedule->call(function () {
+            $start = now()->addMinutes(15)->startOfMinute();
+            $end = now()->addMinutes(16)->startOfMinute();
+
+            Appointment::with(['customer', 'serviceType'])
+                ->where('status', 'paid')
+                ->whereBetween('start_at', [$start, $end])
+                ->each(function ($appointment) {
+                    SendAppointmentReminder::dispatch($appointment);
+                });
+        })->everyMinute()->name('appointment-reminders-fcm');
+
         // Send appointment reminders 24 hours before
         $schedule->call(function () {
             try {

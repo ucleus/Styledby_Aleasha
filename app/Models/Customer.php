@@ -23,6 +23,11 @@ class Customer extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
     /**
      * Route notifications for the mail channel.
      */
